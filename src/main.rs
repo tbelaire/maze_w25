@@ -110,6 +110,7 @@ fn main() {
 
     print!("\x1B[2J");
     print!("\x1B[1;1H");
+    print!("\x1B[?25l");
 
     let termios_old: Termios;
     let mut stdin = File::open("/dev/stdin").unwrap();
@@ -155,4 +156,5 @@ fn main() {
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
     print!("\x1B[2J");
     print!("\x1B[1;1H");
+    print!("\x1B[?25h");
 }
