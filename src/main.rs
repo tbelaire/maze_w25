@@ -5,7 +5,7 @@ use std::io::BufReader;
 use std::fs::File;
 use std::fmt;
 
-use ansi_term::Colour::{Red, Blue};
+use ansi_term::Colour::{Red, Blue, Green};
 use ansi_term::Style;
 use ansi_term::{ANSIString, ANSIStrings};
 
@@ -76,10 +76,36 @@ fn read_maze(filename: &str) -> std::io::Result<Maze> {
     return Ok(maze);
 }
 
-fn main() {
-    let maze = read_maze("maze.txt");
-    match maze {
-        Err(err) => println!("err is {:?}", err),
-        Ok(maze) => println!("got maze\n{}", maze),
+enum Direction {
+    North,
+    East,
+    South,
+    West,
+}
+
+struct Player {
+    row: usize,
+    col: usize,
+    dir: Direction,
+}
+
+impl fmt::Display for Player {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "\x1B7\x1B[{row};{col}f{character}",
+               row=self.row, col=self.col,
+               character=Green.paint("&"))
     }
+}
+
+fn main() {
+    let maze = read_maze("maze.txt").unwrap();
+
+    println!("Maze bounds are {} by {}",
+             maze.map.len(), maze.map[0].len());
+    print!("\x1B[2J");
+    print!("\x1B[1;1H");
+    print!("{}", maze);
+    print!("{}", Player{ row:4, col: 4, dir:Direction::North });
+    print!("\x1B[2J");
+    print!("\x1B[1;1H");
 }
