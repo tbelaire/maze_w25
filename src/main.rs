@@ -100,12 +100,6 @@ impl fmt::Display for Player {
     }
 }
 
-enum InputStateMachine {
-    Nothing,
-    SawEscape,
-    SawCSI,
-}
-
 fn main() {
     let maze = read_maze("maze.txt").unwrap();
 
@@ -134,9 +128,8 @@ fn main() {
     print!("{}", player);
     ::std::io::stdout().flush().unwrap();
 
-    let mut message = String::new();
-    let mut state = InputStateMachine::Nothing;
     loop{
+
         let mut input : [u8; 64] = [0; 64];
         let mut bytes = match stdin.read(&mut input) {
             Ok(n) => n,
@@ -145,10 +138,10 @@ fn main() {
         if bytes == 3 {
             if input[0] == 0x1B && input[1] == b'[' {
                 match input[2] {
-                    b'A' =>  (),
-                    b'B' =>  (),
-                    b'C' =>  (),
-                    b'D' =>  (),
+                    b'A' =>  player.row -= 1,
+                    b'B' =>  player.row += 1,
+                    b'C' =>  player.col += 1,
+                    b'D' =>  player.col -= 1,
                     _ => panic!("unknown escape sequence"),
                 }
             }
@@ -156,10 +149,10 @@ fn main() {
             break;
         }
 
-        message = "Hi".to_string();
+        print!("{}", player);
+        ::std::io::stdout().flush().unwrap();
     }
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
     print!("\x1B[2J");
     print!("\x1B[1;1H");
-    println!("Message: {}", message);
 }
