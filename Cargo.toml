@@ -1,0 +1,6 @@
+[package]
+name = "weekely_challenge_25"
+version = "0.1.0"
+authors = ["Theo Belaire <theo.belaire@gmail.com>"]
+
+[dependencies]
