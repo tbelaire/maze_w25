@@ -146,8 +146,10 @@ fn main() {
                     _ => panic!("unknown escape sequence"),
                 }
             }
-        } else {
-            break;
+        } else if bytes == 1 {
+            if input[0] == b'q' {
+                break;
+            }
         }
 
         print!("{}", player);
