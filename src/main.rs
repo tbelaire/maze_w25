@@ -1,7 +1,13 @@
+extern crate ansi_term;
+
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
 use std::fmt;
+
+use ansi_term::Colour::{Red, Blue};
+use ansi_term::Style;
+use ansi_term::{ANSIString, ANSIStrings};
 
 #[derive(Debug)]
 enum Tile {
@@ -10,12 +16,23 @@ enum Tile {
     Exit
 }
 
+impl Tile {
+    fn coloured(&self) -> ANSIString<'static> {
+        match *self {
+            Tile::Floor => Style::new().paint(" "),
+            Tile::Wall => Red.paint("#"),
+            Tile::Exit => Blue.paint("X"),
+        }
+    }
+}
+
+
 impl fmt::Display for Tile {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", match *self {
-            Tile::Floor => ' ',
-            Tile::Wall => '#',
-            Tile::Exit => 'X',
+            Tile::Floor => Red.paint(" "), // Less adjusting the colour
+            Tile::Wall => Red.paint("#"),
+            Tile::Exit => Blue.paint("X"),
         })
     }
 }
@@ -27,13 +44,14 @@ struct Maze {
 
 impl fmt::Display for Maze {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut strings = vec![];
         for ref line in &self.map {
             for t in line.iter() {
-                try!(write!(f, "{}", t))
+                strings.push(t.coloured());
             }
-            try!(writeln!(f, ""))
+            strings.push(Style::new().paint("\n"));
         }
-        Ok(())
+        write!(f, "{}", ANSIStrings(&strings[..]))
     }
 }
 
