@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Theo Belaire <theo.belaire@gmail.com>"]
 
 [dependencies]
-ansi_term = "*"
+ansi_term = "0.8"
+termios = "0.2"

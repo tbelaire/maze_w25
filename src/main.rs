@@ -1,4 +1,5 @@
 extern crate ansi_term;
+extern crate termios;
 
 use std::io::prelude::*;
 use std::io::BufReader;
@@ -8,6 +9,8 @@ use std::fmt;
 use ansi_term::Colour::{Red, Blue, Green};
 use ansi_term::Style;
 use ansi_term::{ANSIString, ANSIStrings};
+
+use std::os::unix::io::{IntoRawFd, AsRawFd, RawFd};
 
 #[derive(Debug)]
 enum Tile {
@@ -97,15 +100,66 @@ impl fmt::Display for Player {
     }
 }
 
+enum InputStateMachine {
+    Nothing,
+    SawEscape,
+    SawCSI,
+}
+
 fn main() {
     let maze = read_maze("maze.txt").unwrap();
 
     println!("Maze bounds are {} by {}",
              maze.map.len(), maze.map[0].len());
+
+    use termios::*;
+
     print!("\x1B[2J");
     print!("\x1B[1;1H");
+
+    let termios_old: Termios;
+    let mut stdin = File::open("/dev/stdin").unwrap();
+    let mut termios = Termios::from_fd(stdin.as_raw_fd()).unwrap();
+    tcgetattr(stdin.as_raw_fd(), &mut termios).unwrap();
+    termios_old = termios.clone();
+    termios.c_lflag = ISIG;
+    termios.c_cc[VTIME] = 0;
+    termios.c_cc[VMIN] = 1;
+    // cfmakeraw(&mut termios);
+    tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios).unwrap();
+
     print!("{}", maze);
-    print!("{}", Player{ row:4, col: 4, dir:Direction::North });
+    let mut player = Player{ row:4, col: 4, dir:Direction::North };
+
+    print!("{}", player);
+    ::std::io::stdout().flush().unwrap();
+
+    let mut message = String::new();
+    let mut state = InputStateMachine::Nothing;
+    loop{
+        let mut input : [u8; 64] = [0; 64];
+        let mut bytes = match stdin.read(&mut input) {
+            Ok(n) => n,
+            Err(_) => break,
+        };
+        if bytes == 3 {
+            if input[0] == 0x1B && input[1] == b'[' {
+                match input[2] {
+                    b'A' =>  (),
+                    b'B' =>  (),
+                    b'C' =>  (),
+                    b'D' =>  (),
+                    _ => panic!("unknown escape sequence"),
+                }
+            }
+        } else {
+            break;
+        }
+
+        message = "Hi".to_string();
+    }
+    tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
     print!("\x1B[2J");
     print!("\x1B[1;1H");
+    println!("Message: {}", message);
 }
