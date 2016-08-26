@@ -16,7 +16,7 @@ use std::os::unix::io::{IntoRawFd, AsRawFd, RawFd};
 enum Tile {
     Floor,
     Wall,
-    Exit
+    Exit,
 }
 
 impl Tile {
@@ -32,22 +32,24 @@ impl Tile {
 
 impl fmt::Display for Tile {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match *self {
-            Tile::Floor => Red.paint(" "), // Less adjusting the colour
-            Tile::Wall => Red.paint("#"),
-            Tile::Exit => Blue.paint("X"),
-        })
+        write!(f,
+               "{}",
+               match *self {
+                   Tile::Floor => Red.paint(" "), // Less adjusting the colour
+                   Tile::Wall => Red.paint("#"),
+                   Tile::Exit => Blue.paint("X"),
+               })
     }
 }
 
 #[derive(Debug)]
 struct Maze {
-    map: Vec<Vec<Tile>>
+    map: Vec<Vec<Tile>>,
 }
 
 impl std::ops::Index<(usize, usize)> for Maze {
     type Output = Tile;
-    fn index<'a>(&'a self, (row,col): (usize, usize)) -> &'a Tile {
+    fn index<'a>(&'a self, (row, col): (usize, usize)) -> &'a Tile {
         &self.map[row][col]
     }
 }
@@ -55,7 +57,7 @@ impl std::ops::Index<(usize, usize)> for Maze {
 impl Maze {
     fn redraw_tile(&self, row: usize, col: usize) {
         move_cursor(row, col); // + C?
-        print!("{}", self[(row-1,col-1)].coloured());
+        print!("{}", self[(row - 1, col - 1)].coloured());
     }
 }
 
@@ -77,19 +79,22 @@ impl Maze {
     fn from_file(filename: &str) -> std::io::Result<Maze> {
         let f = try!(File::open(filename));
         let mut reader = BufReader::new(f);
-        let mut maze = Maze{ map: Vec::new() };
+        let mut maze = Maze { map: Vec::new() };
         loop {
             let mut line = String::new();
             let size = try!(reader.read_line(&mut line));
             if size == 0 {
                 break;
             }
-            let maze_line = line[.. size -1 ].chars().map(|c| match c {
-                '#' => Tile::Wall,
-                ' ' => Tile::Floor,
-                'X' => Tile::Exit,
-                _   => panic!("Bad maze character '{}'", c)
-            }).collect();
+            let maze_line = line[..size - 1]
+                .chars()
+                .map(|c| match c {
+                    '#' => Tile::Wall,
+                    ' ' => Tile::Floor,
+                    'X' => Tile::Exit,
+                    _ => panic!("Bad maze character '{}'", c),
+                })
+                .collect();
             maze.map.push(maze_line);
         }
         return Ok(maze);
@@ -113,15 +118,17 @@ struct Player {
 
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "\x1B7\x1B[{row};{col}f{character}",
-               row=self.row, col=self.col,
-               character=Green.paint("&"))
+        write!(f,
+               "\x1B7\x1B[{row};{col}f{character}",
+               row = self.row,
+               col = self.col,
+               character = Green.paint("&"))
     }
 }
 
 enum Command {
     Move(Direction),
-    Quit
+    Quit,
 }
 
 fn parse_keystroke(input: &[u8]) -> Option<Command> {
@@ -130,10 +137,10 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
     if input.len() == 3 {
         if input[0] == 0x1B && input[1] == b'[' {
             match input[2] {
-                b'A' =>  Some(Move(North)),
-                b'B' =>  Some(Move(South)),
-                b'C' =>  Some(Move(East)),
-                b'D' =>  Some(Move(West)),
+                b'A' => Some(Move(North)),
+                b'B' => Some(Move(South)),
+                b'C' => Some(Move(East)),
+                b'D' => Some(Move(West)),
                 _ => panic!("unknown escape sequence"),
             }
         } else {
@@ -142,22 +149,23 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
     } else if input.len() == 1 {
         if input[0] == b'q' {
             Some(Command::Quit)
-        } else{
+        } else {
             None
         }
     } else {
         None
     }
 }
+
 fn move_cursor(row: usize, col: usize) {
-        print!("\x1B7\x1B[{row};{col}f",
-               row=row, col=col);
+    print!("\x1B7\x1B[{row};{col}f", row = row, col = col);
 }
 fn main() {
     let maze = Maze::from_file("maze.txt").unwrap();
 
     println!("Maze bounds are {} by {}",
-             maze.map.len(), maze.map[0].len());
+             maze.map.len(),
+             maze.map[0].len());
 
     use termios::*;
 
@@ -177,14 +185,18 @@ fn main() {
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios).unwrap();
 
     print!("{}", maze);
-    let mut player = Player{ row:4, col: 4, dir:Direction::North };
+    let mut player = Player {
+        row: 4,
+        col: 4,
+        dir: Direction::North,
+    };
 
     print!("{}", player);
     ::std::io::stdout().flush().unwrap();
 
-    loop{
+    loop {
 
-        let mut input : [u8; 64] = [0; 64];
+        let mut input: [u8; 64] = [0; 64];
         let mut bytes = match stdin.read(&mut input) {
             Ok(n) => n,
             Err(_) => break,
@@ -199,8 +211,8 @@ fn main() {
                     match dir {
                         North => player.row -= 1,
                         South => player.row += 1,
-                        East  => player.col += 1,
-                        West  => player.col -= 1,
+                        East => player.col += 1,
+                        West => player.col -= 1,
                     }
                     maze.redraw_tile(old_player.row, old_player.col);
                 }
