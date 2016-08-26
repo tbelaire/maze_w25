@@ -45,10 +45,17 @@ struct Maze {
     map: Vec<Vec<Tile>>
 }
 
+impl std::ops::Index<(usize, usize)> for Maze {
+    type Output = Tile;
+    fn index<'a>(&'a self, (row,col): (usize, usize)) -> &'a Tile {
+        &self.map[row][col]
+    }
+}
+
 impl Maze {
     fn redraw_tile(&self, row: usize, col: usize) {
         move_cursor(row, col); // + C?
-        print!("{}", self.map[row-1][col-1].coloured());
+        print!("{}", self[(row-1,col-1)].coloured());
     }
 }
 
