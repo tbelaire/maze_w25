@@ -45,6 +45,13 @@ struct Maze {
     map: Vec<Vec<Tile>>
 }
 
+impl Maze {
+    fn redraw_tile(&self, row: usize, col: usize) {
+        move_cursor(row, col); // + C?
+        print!("{}", self.map[row-1][col-1].coloured());
+    }
+}
+
 impl fmt::Display for Maze {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut strings = vec![];
@@ -79,6 +86,7 @@ fn read_maze(filename: &str) -> std::io::Result<Maze> {
     return Ok(maze);
 }
 
+#[derive(Clone, Debug)]
 enum Direction {
     North,
     East,
@@ -86,6 +94,7 @@ enum Direction {
     West,
 }
 
+#[derive(Clone, Debug)]
 struct Player {
     row: usize,
     col: usize,
@@ -100,6 +109,40 @@ impl fmt::Display for Player {
     }
 }
 
+enum Command {
+    Move(Direction),
+    Quit
+}
+
+fn parse_keystroke(input: &[u8]) -> Option<Command> {
+    use Command::*;
+    use Direction::*;
+    if input.len() == 3 {
+        if input[0] == 0x1B && input[1] == b'[' {
+            match input[2] {
+                b'A' =>  Some(Move(North)),
+                b'B' =>  Some(Move(South)),
+                b'C' =>  Some(Move(East)),
+                b'D' =>  Some(Move(West)),
+                _ => panic!("unknown escape sequence"),
+            }
+        } else {
+            None
+        }
+    } else if input.len() == 1 {
+        if input[0] == b'q' {
+            Some(Command::Quit)
+        } else{
+            None
+        }
+    } else {
+        None
+    }
+}
+fn move_cursor(row: usize, col: usize) {
+        print!("\x1B7\x1B[{row};{col}f",
+               row=row, col=col);
+}
 fn main() {
     let maze = read_maze("maze.txt").unwrap();
 
@@ -136,24 +179,26 @@ fn main() {
             Ok(n) => n,
             Err(_) => break,
         };
-        if bytes == 3 {
-            if input[0] == 0x1B && input[1] == b'[' {
-                match input[2] {
-                    b'A' =>  player.row -= 1,
-                    b'B' =>  player.row += 1,
-                    b'C' =>  player.col += 1,
-                    b'D' =>  player.col -= 1,
-                    _ => panic!("unknown escape sequence"),
+        let command = parse_keystroke(&input[..bytes]);
+        if let Some(command) = command {
+            match command {
+                Command::Quit => break,
+                Command::Move(dir) => {
+                    let old_player = player.clone();
+                    use Direction::*;
+                    match dir {
+                        North => player.row -= 1,
+                        South => player.row += 1,
+                        East  => player.col += 1,
+                        West  => player.col -= 1,
+                    }
+                    maze.redraw_tile(old_player.row, old_player.col);
                 }
             }
-        } else if bytes == 1 {
-            if input[0] == b'q' {
-                break;
-            }
-        }
 
-        print!("{}", player);
-        ::std::io::stdout().flush().unwrap();
+            print!("{}", player);
+            ::std::io::stdout().flush().unwrap();
+        }
     }
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
     print!("\x1B[2J");
