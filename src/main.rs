@@ -72,25 +72,28 @@ impl fmt::Display for Maze {
     }
 }
 
-fn read_maze(filename: &str) -> std::io::Result<Maze> {
-    let f = try!(File::open(filename));
-    let mut reader = BufReader::new(f);
-    let mut maze = Maze{ map: Vec::new() };
-    loop {
-        let mut line = String::new();
-        let size = try!(reader.read_line(&mut line));
-        if size == 0 {
-            break;
+
+impl Maze {
+    fn from_file(filename: &str) -> std::io::Result<Maze> {
+        let f = try!(File::open(filename));
+        let mut reader = BufReader::new(f);
+        let mut maze = Maze{ map: Vec::new() };
+        loop {
+            let mut line = String::new();
+            let size = try!(reader.read_line(&mut line));
+            if size == 0 {
+                break;
+            }
+            let maze_line = line[.. size -1 ].chars().map(|c| match c {
+                '#' => Tile::Wall,
+                ' ' => Tile::Floor,
+                'X' => Tile::Exit,
+                _   => panic!("Bad maze character '{}'", c)
+            }).collect();
+            maze.map.push(maze_line);
         }
-        let maze_line = line[.. size -1 ].chars().map(|c| match c {
-            '#' => Tile::Wall,
-            ' ' => Tile::Floor,
-            'X' => Tile::Exit,
-            _   => panic!("Bad maze character '{}'", c)
-        }).collect();
-        maze.map.push(maze_line);
+        return Ok(maze);
     }
-    return Ok(maze);
 }
 
 #[derive(Clone, Debug)]
@@ -151,7 +154,7 @@ fn move_cursor(row: usize, col: usize) {
                row=row, col=col);
 }
 fn main() {
-    let maze = read_maze("maze.txt").unwrap();
+    let maze = Maze::from_file("maze.txt").unwrap();
 
     println!("Maze bounds are {} by {}",
              maze.map.len(), maze.map[0].len());
