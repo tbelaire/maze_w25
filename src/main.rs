@@ -12,6 +12,9 @@ use ansi_term::{ANSIString, ANSIStrings};
 
 use std::os::unix::io::{IntoRawFd, AsRawFd, RawFd};
 
+mod posn;
+use posn::Posn;
+
 #[derive(Debug)]
 enum Tile {
     Floor,
@@ -107,6 +110,18 @@ enum Direction {
     East,
     South,
     West,
+}
+impl Direction {
+    //                    row, col
+    fn numeric(&self) -> (i32, i32) {
+        use Direction::*;
+        match *self {
+            North => (-1, 0),
+            South => (1, 0),
+            East => (0, 1),
+            West => (0, -1),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
