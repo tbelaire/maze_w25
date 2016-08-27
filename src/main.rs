@@ -17,6 +17,7 @@ use maze::Maze;
 use player::Player;
 use posn::Posn;
 use screen::move_cursor;
+use tile::Tile;
 
 
 enum Command {
@@ -74,7 +75,7 @@ fn main() {
 
     print!("{}", maze);
     let mut player = Player {
-        pos: Posn { row: 4, col: 4 },
+        pos: Posn { row: 4, col: 5 },
         dir: Direction::North,
     };
 
@@ -91,18 +92,28 @@ fn main() {
             match command {
                 Command::Quit => break,
                 Command::Move(dir) => {
-                    let old_player = player.clone();
-                    player.pos = player.pos + dir.numeric();
-                    if !maze.in_bounds(&player.pos) {
-                        player = old_player;
-                    } else {
-                        maze.redraw_tile(old_player.pos.row as usize, old_player.pos.col as usize);
+                    let mut new_player = player.clone();
+                    new_player.pos = new_player.pos + dir.numeric();
+                    if maze.in_bounds(&new_player.pos) {
+                        match maze[&new_player.pos] {
+                            Tile::Floor => {
+                                // We've moved the player.
+                                maze.redraw_tile(player.pos.row as usize, player.pos.col as usize);
+                                player = new_player;
+                            }
+                            Tile::Exit => {
+                                println!("\nYou win!");
+                                break;
+                            }
+                            _ => (),
+                        }
                     }
+
                 }
             }
 
             player.draw();
-            move_cursor(50,0);
+            move_cursor(50, 0);
             print!("{},{}", player.pos.col, player.pos.row);
             ::std::io::stdout().flush().unwrap();
         }
