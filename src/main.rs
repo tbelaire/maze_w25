@@ -16,6 +16,7 @@ use direction::{Direction, North, South, East, West};
 use maze::Maze;
 use player::Player;
 use posn::Posn;
+use screen::move_cursor;
 
 
 enum Command {
@@ -77,8 +78,7 @@ fn main() {
         dir: Direction::North,
     };
 
-    print!("{}", player);
-    ::std::io::stdout().flush().unwrap();
+    player.draw();
 
     loop {
         let mut input: [u8; 64] = [0; 64];
@@ -93,11 +93,17 @@ fn main() {
                 Command::Move(dir) => {
                     let old_player = player.clone();
                     player.pos = player.pos + dir.numeric();
-                    maze.redraw_tile(old_player.pos.row as usize, old_player.pos.col as usize);
+                    if !maze.in_bounds(&player.pos) {
+                        player = old_player;
+                    } else {
+                        maze.redraw_tile(old_player.pos.row as usize, old_player.pos.col as usize);
+                    }
                 }
             }
 
-            print!("{}", player);
+            player.draw();
+            move_cursor(50,0);
+            print!("{},{}", player.pos.col, player.pos.row);
             ::std::io::stdout().flush().unwrap();
         }
     }

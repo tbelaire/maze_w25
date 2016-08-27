@@ -47,9 +47,10 @@ impl fmt::Display for Maze {
 
 impl Maze {
     pub fn redraw_tile(&self, row: usize, col: usize) {
-        move_cursor(row, col); // + C?
-        print!("{}", self[(row - 1, col - 1)].coloured());
+        move_cursor(row, col);
+        print!("{}", self[(row, col)].coloured());
     }
+
     pub fn from_file(filename: &str) -> std::io::Result<Maze> {
         let f = try!(File::open(filename));
         let mut reader = BufReader::new(f);
@@ -73,4 +74,29 @@ impl Maze {
         }
         return Ok(maze);
     }
+
+    pub fn new(map: Vec<Vec<Tile>>) -> Maze {
+        assert!(map.len() > 0);
+        assert!(map[0].len() > 0);
+        Maze { map: map }
+    }
+
+    pub fn in_bounds(&self, pos: &Posn) -> bool {
+        pos.row >= 0 && pos.row < self.map.len() as i32
+            && pos.col >= 0 && pos.col < self.map[0].len() as i32
+    }
 }
+
+#[test]
+fn test_maze_bounds() {
+    use tile::Tile::*;
+    let row = vec![Floor, Floor, Floor, Floor];
+    let maze = Maze::new(vec![row.clone(), row.clone()]);
+    assert_eq!(maze.in_bounds(&Posn{row:0, col:0}), true);
+    assert_eq!(maze.in_bounds(&Posn{row:10, col:10}), false);
+    assert_eq!(maze.in_bounds(&Posn{row:1, col:0}), true);
+    assert_eq!(maze.in_bounds(&Posn{row:2, col:0}), false);
+    assert_eq!(maze.in_bounds(&Posn{row:1, col:10}), false);
+    assert_eq!(maze.in_bounds(&Posn{row:1, col:3}), true);
+}
+

@@ -5,7 +5,7 @@ use ansi_term::Colour::{Red, Blue};
 use ansi_term::Style;
 use ansi_term::ANSIString;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Tile {
     Floor,
     Wall,
