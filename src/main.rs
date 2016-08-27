@@ -15,6 +15,7 @@ mod tile;
 use direction::{Direction, North, South, East, West};
 use maze::Maze;
 use player::Player;
+use posn::Posn;
 
 
 enum Command {
@@ -68,13 +69,11 @@ fn main() {
     termios.c_lflag = ISIG;
     termios.c_cc[VTIME] = 0;
     termios.c_cc[VMIN] = 1;
-    // cfmakeraw(&mut termios);
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios).unwrap();
 
     print!("{}", maze);
     let mut player = Player {
-        row: 4,
-        col: 4,
+        pos: Posn { row: 4, col: 4 },
         dir: Direction::North,
     };
 
@@ -82,7 +81,6 @@ fn main() {
     ::std::io::stdout().flush().unwrap();
 
     loop {
-
         let mut input: [u8; 64] = [0; 64];
         let bytes = match stdin.read(&mut input) {
             Ok(n) => n,
@@ -94,13 +92,8 @@ fn main() {
                 Command::Quit => break,
                 Command::Move(dir) => {
                     let old_player = player.clone();
-                    match dir {
-                        North => player.row -= 1,
-                        South => player.row += 1,
-                        East => player.col += 1,
-                        West => player.col -= 1,
-                    }
-                    maze.redraw_tile(old_player.row, old_player.col);
+                    player.pos = player.pos + dir.numeric();
+                    maze.redraw_tile(old_player.pos.row as usize, old_player.pos.col as usize);
                 }
             }
 

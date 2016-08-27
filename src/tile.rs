@@ -3,7 +3,7 @@ use std::fmt;
 
 use ansi_term::Colour::{Red, Blue};
 use ansi_term::Style;
-use ansi_term::{ANSIString};
+use ansi_term::ANSIString;
 
 #[derive(Debug)]
 pub enum Tile {

@@ -7,8 +7,9 @@ use std::io::prelude::*;
 use ansi_term::Style;
 use ansi_term::ANSIStrings;
 
-use tile::Tile;
+use posn::Posn;
 use screen::move_cursor;
+use tile::Tile;
 
 
 #[derive(Debug)]
@@ -20,6 +21,13 @@ impl ::std::ops::Index<(usize, usize)> for Maze {
     type Output = Tile;
     fn index<'a>(&'a self, (row, col): (usize, usize)) -> &'a Tile {
         &self.map[row][col]
+    }
+}
+
+impl<'c> ::std::ops::Index<&'c Posn> for Maze {
+    type Output = Tile;
+    fn index<'a, 'b>(&'a self, p: &'b Posn) -> &'a Tile {
+        &self.map[p.row as usize][p.col as usize]
     }
 }
 
