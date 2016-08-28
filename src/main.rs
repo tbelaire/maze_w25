@@ -37,6 +37,10 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
         b"\x1B[B" => Some(Move(South)),
         b"\x1B[C" => Some(Move(East)),
         b"\x1B[D" => Some(Move(West)),
+        b"w" => Some(Move(North)),
+        b"s" => Some(Move(South)),
+        b"a" => Some(Move(West)),
+        b"d" => Some(Move(East)),
         b"q" => Some(Quit),
         _ => None,
     }
@@ -58,6 +62,7 @@ fn main() {
         panic!("Failed to initialize global logger: {}", e);
     }
 
+    println!("q to Quit");
     println!("Maze bounds are {} by {}",
              maze.map.len(),
              maze.map[0].len());
