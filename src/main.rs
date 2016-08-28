@@ -73,11 +73,10 @@ fn main() {
     print!("\x1B[1;1H");
     print!("\x1B[?25l");
 
-    let termios_old: Termios;
     let mut stdin = File::open("/dev/stdin").unwrap();
     let mut termios = Termios::from_fd(stdin.as_raw_fd()).unwrap();
     tcgetattr(stdin.as_raw_fd(), &mut termios).unwrap();
-    termios_old = termios.clone();
+    let mut termios_old = termios.clone();
     termios.c_lflag = ISIG;
     termios.c_cc[VTIME] = 0;
     termios.c_cc[VMIN] = 1;
@@ -147,6 +146,9 @@ fn main() {
         ::std::io::stdout().flush().unwrap();
     }
     info!("Game over");
+    // We always want to set the terminal to echo stuff, even if we didn't
+    // start with it, as this fixes a broken terminal after a ctrl-c.
+    termios_old.c_lflag = ICANON | ECHO | ECHOE | ECHOK | ECHONL;
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
     print!("\x1B[2J");
     print!("\x1B[1;1H");

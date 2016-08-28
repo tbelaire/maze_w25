@@ -79,7 +79,7 @@ impl Maze {
                 .collect();
             maze.map.push(maze_line);
         }
-        return Ok(maze);
+        Ok(maze);
     }
 
     pub fn new(map: Vec<Vec<Tile>>) -> Maze {

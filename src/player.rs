@@ -1,5 +1,4 @@
 use std::fmt;
-use std::io::prelude::*;
 
 use ansi_term::Colour::Green;
 
