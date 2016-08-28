@@ -6,3 +6,6 @@ authors = ["Theo Belaire <theo.belaire@gmail.com>"]
 [dependencies]
 ansi_term = "0.8"
 termios = "0.2"
+log = "0.3"
+fern = "0.3"
+time = "0.1"

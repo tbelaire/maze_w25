@@ -1,5 +1,9 @@
 extern crate ansi_term;
 extern crate termios;
+#[macro_use]
+extern crate log;
+extern crate fern;
+extern crate time;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -53,6 +57,19 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
 fn main() {
     let mut maze = Maze::from_file("maze.txt").unwrap();
 
+    let logger_config = fern::DispatchConfig {
+    format: Box::new(|msg: &str, level: &log::LogLevel, _location: &log::LogLocation| {
+        // This is a fairly simple format, though it's possible to do more complicated ones.
+        // This closure can contain any code, as long as it produces a String message.
+        format!("[{}][{}] {}", time::now().strftime("%Y-%m-%d][%H:%M:%S").unwrap(), level, msg)
+    }),
+    output: vec![fern::OutputConfig::file("maze.log")],
+    level: log::LogLevelFilter::Trace,
+    };
+    if let Err(e) = fern::init_global_logger(logger_config, log::LogLevelFilter::Trace) {
+        panic!("Failed to initialize global logger: {}", e);
+    }
+
     println!("Maze bounds are {} by {}",
              maze.map.len(),
              maze.map[0].len());
@@ -82,7 +99,7 @@ fn main() {
     player.draw();
     ::std::io::stdout().flush().unwrap();
 
-    writeln!(&mut std::io::stderr(), "Starting game").unwrap();
+    info!("Starting game");
 
     loop {
         let mut input: [u8; 64] = [0; 64];
@@ -109,12 +126,12 @@ fn main() {
                             break;
                         }
                         Tile::Wall => {
-                            writeln!(&mut std::io::stderr(), "Walking into wall").unwrap();
+                            trace!("Walking into wall");
                             let next_tile_posn = new_player.pos + dir.numeric();
                             if maze.in_bounds(&next_tile_posn) {
                                 let next_tile = maze[&next_tile_posn];
-                                writeln!(&mut std::io::stderr(), "Next tile ({:?}) is {:?}",
-                                next_tile_posn, next_tile).unwrap();
+
+                                trace!("Next tile ({:?}) is {:?}", next_tile_posn, next_tile);
                                 match next_tile {
                                     Tile::Floor => {
                                         maze[&next_tile_posn] = Tile::Wall;
@@ -136,6 +153,7 @@ fn main() {
         print!("{},{}", player.pos.col, player.pos.row);
         ::std::io::stdout().flush().unwrap();
     }
+    info!("Game over");
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
     print!("\x1B[2J");
     print!("\x1B[1;1H");
