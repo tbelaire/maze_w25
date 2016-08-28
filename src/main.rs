@@ -88,35 +88,33 @@ fn main() {
             Err(_) => break,
         };
         let command = parse_keystroke(&input[..bytes]);
-        if let Some(command) = command {
-            match command {
-                Command::Quit => break,
-                Command::Move(dir) => {
-                    let mut new_player = player.clone();
-                    new_player.pos = new_player.pos + dir.numeric();
-                    if maze.in_bounds(&new_player.pos) {
-                        match maze[&new_player.pos] {
-                            Tile::Floor => {
-                                // We've moved the player.
-                                maze.redraw_tile(player.pos.row as usize, player.pos.col as usize);
-                                player = new_player;
-                            }
-                            Tile::Exit => {
-                                println!("\nYou win!");
-                                break;
-                            }
-                            _ => (),
+        match command {
+            None => {}
+            Some(Command::Quit) => break,
+            Some(Command::Move(dir)) => {
+                let mut new_player = player.clone();
+                new_player.pos = new_player.pos + dir.numeric();
+                if maze.in_bounds(&new_player.pos) {
+                    match maze[&new_player.pos] {
+                        Tile::Floor => {
+                            // We've moved the player.
+                            maze.redraw_tile(player.pos.row as usize, player.pos.col as usize);
+                            player = new_player;
                         }
+                        Tile::Exit => {
+                            println!("\nYou win!");
+                            break;
+                        }
+                        Tile::Wall => {}
                     }
-
                 }
             }
-
-            player.draw();
-            move_cursor(50, 0);
-            print!("{},{}", player.pos.col, player.pos.row);
-            ::std::io::stdout().flush().unwrap();
         }
+
+        player.draw();
+        move_cursor(50, 0);
+        print!("{},{}", player.pos.col, player.pos.row);
+        ::std::io::stdout().flush().unwrap();
     }
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
     print!("\x1B[2J");

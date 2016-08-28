@@ -20,7 +20,6 @@ impl Player {
 
         move_cursor(self.pos.row as usize, self.pos.col as usize);
         print!("{}", self);
-        ::std::io::stdout().flush().unwrap();
     }
 }
 
