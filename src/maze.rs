@@ -12,7 +12,7 @@ use screen::move_cursor;
 use tile::Tile;
 
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Maze {
     pub map: Vec<Vec<Tile>>,
 }

@@ -7,7 +7,7 @@ use direction::Direction;
 use posn::Posn;
 use screen::move_cursor;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Player {
     pub pos: Posn,
     pub dir: Direction,

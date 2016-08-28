@@ -1,5 +1,5 @@
 
-#[derive(Copy,Clone,Debug,Eq,PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Posn {
     pub row: i32,
     pub col: i32,

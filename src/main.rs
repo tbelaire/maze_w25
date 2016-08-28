@@ -24,6 +24,7 @@ use screen::move_cursor;
 use tile::Tile;
 
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum Command {
     Move(Direction),
     Quit,
