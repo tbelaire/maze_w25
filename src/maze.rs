@@ -31,6 +31,12 @@ impl<'c> ::std::ops::Index<&'c Posn> for Maze {
     }
 }
 
+impl<'c> ::std::ops::IndexMut<&'c Posn> for Maze {
+    fn index_mut<'a, 'b>(&'a mut self, p: &'b Posn) -> &'a mut Tile {
+        &mut self.map[p.row as usize][p.col as usize]
+    }
+}
+
 impl fmt::Display for Maze {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut strings = vec![];
@@ -46,9 +52,10 @@ impl fmt::Display for Maze {
 
 
 impl Maze {
-    pub fn redraw_tile(&self, row: usize, col: usize) {
-        move_cursor(row, col);
-        print!("{}", self[(row, col)].coloured());
+    pub fn redraw_tile(&self, pos: &Posn) {
+        assert!(self.in_bounds(pos));
+        move_cursor(pos.row as usize, pos.col as usize);
+        print!("{}", self[pos].coloured());
     }
 
     pub fn from_file(filename: &str) -> std::io::Result<Maze> {

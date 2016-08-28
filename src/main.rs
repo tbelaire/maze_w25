@@ -51,7 +51,7 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
 }
 
 fn main() {
-    let maze = Maze::from_file("maze.txt").unwrap();
+    let mut maze = Maze::from_file("maze.txt").unwrap();
 
     println!("Maze bounds are {} by {}",
              maze.map.len(),
@@ -82,6 +82,8 @@ fn main() {
     player.draw();
     ::std::io::stdout().flush().unwrap();
 
+    writeln!(&mut std::io::stderr(), "Starting game").unwrap();
+
     loop {
         let mut input: [u8; 64] = [0; 64];
         let bytes = match stdin.read(&mut input) {
@@ -99,14 +101,31 @@ fn main() {
                     match maze[&new_player.pos] {
                         Tile::Floor => {
                             // We've moved the player.
-                            maze.redraw_tile(player.pos.row as usize, player.pos.col as usize);
+                            maze.redraw_tile(&player.pos);
                             player = new_player;
                         }
                         Tile::Exit => {
                             println!("\nYou win!");
                             break;
                         }
-                        Tile::Wall => {}
+                        Tile::Wall => {
+                            writeln!(&mut std::io::stderr(), "Walking into wall").unwrap();
+                            let next_tile_posn = new_player.pos + dir.numeric();
+                            if maze.in_bounds(&next_tile_posn) {
+                                let next_tile = maze[&next_tile_posn];
+                                writeln!(&mut std::io::stderr(), "Next tile ({:?}) is {:?}",
+                                next_tile_posn, next_tile).unwrap();
+                                match next_tile {
+                                    Tile::Floor => {
+                                        maze[&next_tile_posn] = Tile::Wall;
+                                        maze[&new_player.pos] = Tile::Floor;
+                                        maze.redraw_tile(&new_player.pos);
+                                        maze.redraw_tile(&next_tile_posn);
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
                     }
                 }
             }
