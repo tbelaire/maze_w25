@@ -80,6 +80,7 @@ fn main() {
     };
 
     player.draw();
+    ::std::io::stdout().flush().unwrap();
 
     loop {
         let mut input: [u8; 64] = [0; 64];
@@ -93,7 +94,7 @@ fn main() {
             Some(Command::Quit) => break,
             Some(Command::Move(dir)) => {
                 let mut new_player = player.clone();
-                new_player.pos = new_player.pos + dir.numeric();
+                new_player.update(dir);
                 if maze.in_bounds(&new_player.pos) {
                     match maze[&new_player.pos] {
                         Tile::Floor => {

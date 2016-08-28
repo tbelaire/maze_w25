@@ -1,5 +1,5 @@
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Direction {
     North,
     East,
@@ -18,4 +18,14 @@ impl Direction {
             West => (0, -1),
         }
     }
+    pub fn unicode(&self) -> &'static str {
+        match *self {
+            North => "▲",
+            South => "▼",
+            East => "▶",
+            West => "◀",
+        }
+    }
 }
+
+

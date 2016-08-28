@@ -21,11 +21,18 @@ impl Player {
         move_cursor(self.pos.row as usize, self.pos.col as usize);
         print!("{}", self);
     }
+    pub fn update(&mut self, dir: Direction) {
+        if dir == self.dir {
+            self.pos = self.pos + dir.numeric();
+        } else {
+            self.dir = dir
+        }
+    }
 }
 
 
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{character}", character = Green.paint("&"))
+        write!(f, "{}", Green.paint(self.dir.unicode()))
     }
 }
