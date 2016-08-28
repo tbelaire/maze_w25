@@ -32,26 +32,13 @@ enum Command {
 
 fn parse_keystroke(input: &[u8]) -> Option<Command> {
     use Command::*;
-    if input.len() == 3 {
-        if input[0] == 0x1B && input[1] == b'[' {
-            match input[2] {
-                b'A' => Some(Move(North)),
-                b'B' => Some(Move(South)),
-                b'C' => Some(Move(East)),
-                b'D' => Some(Move(West)),
-                _ => panic!("unknown escape sequence"),
-            }
-        } else {
-            None
-        }
-    } else if input.len() == 1 {
-        if input[0] == b'q' {
-            Some(Command::Quit)
-        } else {
-            None
-        }
-    } else {
-        None
+    match input {
+        b"\x1B[A" => Some(Move(North)),
+        b"\x1B[B" => Some(Move(South)),
+        b"\x1B[C" => Some(Move(East)),
+        b"\x1B[D" => Some(Move(West)),
+        b"q" => Some(Quit),
+        _ => None,
     }
 }
 
