@@ -101,7 +101,7 @@ fn main() {
         };
         let command = parse_keystroke(&input[..bytes]);
         match command {
-            None => {}
+            None => continue,
             Some(Command::Quit) => break,
             Some(Command::Move(dir)) => {
                 let mut new_player = player.clone();
