@@ -19,7 +19,7 @@ pub struct Maze {
 
 impl ::std::ops::Index<(usize, usize)> for Maze {
     type Output = Tile;
-    fn index<'a>(&'a self, (row, col): (usize, usize)) -> &'a Tile {
+    fn index(&self, (row, col): (usize, usize)) -> &Tile {
         &self.map[row][col]
     }
 }
@@ -40,7 +40,7 @@ impl<'c> ::std::ops::IndexMut<&'c Posn> for Maze {
 impl fmt::Display for Maze {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut strings = vec![];
-        for ref line in &self.map {
+        for line in &self.map {
             for t in line.iter() {
                 strings.push(t.coloured());
             }
