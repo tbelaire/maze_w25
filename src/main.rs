@@ -15,6 +15,7 @@ mod player;
 mod posn;
 mod screen;
 mod tile;
+mod troll;
 
 use direction::{Direction, North, South, East, West};
 use maze::Maze;
@@ -22,6 +23,7 @@ use player::Player;
 use posn::Posn;
 use screen::move_cursor;
 use tile::Tile;
+use troll::Troll;
 
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -85,6 +87,8 @@ fn main() {
     termios.c_cc[VMIN] = 1;
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios).unwrap();
 
+    maze.add_troll(Posn { row: 1, col: 5 }, Troll { dir: South });
+
     print!("{}", maze);
     let mut player = Player {
         pos: Posn { row: 4, col: 5 },
@@ -130,14 +134,11 @@ fn main() {
                         let next_tile = maze[&next_tile_posn];
 
                         trace!("Next tile ({:?}) is {:?}", next_tile_posn, next_tile);
-                        match next_tile {
-                            Tile::Floor => {
-                                maze[&next_tile_posn] = Tile::Wall;
-                                maze[&new_player.pos] = Tile::Floor;
-                                maze.redraw_tile(&new_player.pos);
-                                maze.redraw_tile(&next_tile_posn);
-                            }
-                            _ => {}
+                        if let Tile::Floor = next_tile {
+                            maze[&next_tile_posn] = Tile::Wall;
+                            maze[&new_player.pos] = Tile::Floor;
+                            maze.redraw_tile(&new_player.pos);
+                            maze.redraw_tile(&next_tile_posn);
                         }
                     }
                 }
