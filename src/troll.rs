@@ -10,6 +10,7 @@ use ansi_term::ANSIString;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Troll {
     pub dir: Direction,
+    pub alive: bool,
 }
 
 impl fmt::Display for Troll {
@@ -25,7 +26,18 @@ impl<'a> Into<Cow<'static, str>> for &'a Troll {
 }
 
 impl Troll {
+    pub fn new(dir: Direction) -> Troll {
+        Troll {
+            dir: dir,
+            alive: true,
+        }
+    }
+
     pub fn coloured(&self) -> ANSIString {
-        Blue.paint(self)
+        if self.alive {
+            Blue.paint(self)
+        } else {
+            Red.paint(self)
+        }
     }
 }

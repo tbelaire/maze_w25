@@ -87,7 +87,7 @@ fn main() {
     termios.c_cc[VMIN] = 1;
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios).unwrap();
 
-    maze.add_troll(Posn { row: 1, col: 5 }, Troll { dir: South });
+    maze.add_troll(Posn { row: 1, col: 5 }, Troll::new(South));
 
     print!("{}", maze);
     let mut player = Player {
@@ -128,19 +128,7 @@ fn main() {
                     break;
                 }
                 Tile::Wall => {
-                    trace!("Walking into wall");
-                    let next_tile_posn = new_player.pos + new_player.dir.numeric();
-                    if maze.in_bounds(&next_tile_posn) {
-                        let next_tile = maze[&next_tile_posn];
-
-                        trace!("Next tile ({:?}) is {:?}", next_tile_posn, next_tile);
-                        if let Tile::Floor = next_tile {
-                            maze[&next_tile_posn] = Tile::Wall;
-                            maze[&new_player.pos] = Tile::Floor;
-                            maze.redraw_tile(&new_player.pos);
-                            maze.redraw_tile(&next_tile_posn);
-                        }
-                    }
+                    maze.push(new_player.pos, new_player.dir);
                 }
             }
         }

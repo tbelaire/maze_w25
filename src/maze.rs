@@ -13,6 +13,7 @@ use posn::Posn;
 use screen::move_cursor;
 use tile::Tile;
 use troll::Troll;
+use direction::Direction;
 
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -123,6 +124,22 @@ impl Maze {
     pub fn in_bounds(&self, pos: &Posn) -> bool {
         pos.row >= 0 && pos.row < self.map.len() as i32 && pos.col >= 0 &&
         pos.col < self.map[0].len() as i32
+    }
+
+    pub fn push(&mut self, pos: Posn, dir: Direction) {
+        let next_tile_posn = pos + dir.numeric();
+        if self.in_bounds(&next_tile_posn) {
+            let next_tile = self[&next_tile_posn];
+            if let Some(ref mut troll) = self.trolls.get_mut(&pos) {
+                troll.alive = false;
+            }
+            if let Tile::Floor = next_tile {
+                self[&next_tile_posn] = Tile::Wall;
+                self[&pos] = Tile::Floor;
+                self.redraw_tile(&pos);
+                self.redraw_tile(&next_tile_posn);
+            }
+        }
     }
 }
 
