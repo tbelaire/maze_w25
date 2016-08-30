@@ -103,40 +103,41 @@ fn main() {
             Err(_) => break,
         };
         let command = parse_keystroke(&input[..bytes]);
-        match command {
+        let new_player = match command {
             None => continue,
             Some(Command::Quit) => break,
             Some(Command::Move(dir)) => {
                 let mut new_player = player.clone();
                 new_player.update(dir);
-                if maze.in_bounds(&new_player.pos) {
-                    match maze[&new_player.pos] {
-                        Tile::Floor => {
-                            // We've moved the player.
-                            maze.redraw_tile(&player.pos);
-                            player = new_player;
-                        }
-                        Tile::Exit => {
-                            println!("\nYou win!");
-                            break;
-                        }
-                        Tile::Wall => {
-                            trace!("Walking into wall");
-                            let next_tile_posn = new_player.pos + dir.numeric();
-                            if maze.in_bounds(&next_tile_posn) {
-                                let next_tile = maze[&next_tile_posn];
+                new_player
+            }
+        };
+        if maze.in_bounds(&new_player.pos) {
+            match maze[&new_player.pos] {
+                Tile::Floor => {
+                    // We've moved the player.
+                    maze.redraw_tile(&player.pos);
+                    player = new_player;
+                }
+                Tile::Exit => {
+                    println!("\nYou win!");
+                    break;
+                }
+                Tile::Wall => {
+                    trace!("Walking into wall");
+                    let next_tile_posn = new_player.pos + new_player.dir.numeric();
+                    if maze.in_bounds(&next_tile_posn) {
+                        let next_tile = maze[&next_tile_posn];
 
-                                trace!("Next tile ({:?}) is {:?}", next_tile_posn, next_tile);
-                                match next_tile {
-                                    Tile::Floor => {
-                                        maze[&next_tile_posn] = Tile::Wall;
-                                        maze[&new_player.pos] = Tile::Floor;
-                                        maze.redraw_tile(&new_player.pos);
-                                        maze.redraw_tile(&next_tile_posn);
-                                    }
-                                    _ => {}
-                                }
+                        trace!("Next tile ({:?}) is {:?}", next_tile_posn, next_tile);
+                        match next_tile {
+                            Tile::Floor => {
+                                maze[&next_tile_posn] = Tile::Wall;
+                                maze[&new_player.pos] = Tile::Floor;
+                                maze.redraw_tile(&new_player.pos);
+                                maze.redraw_tile(&next_tile_posn);
                             }
+                            _ => {}
                         }
                     }
                 }
