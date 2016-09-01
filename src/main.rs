@@ -4,6 +4,7 @@ extern crate termios;
 extern crate log;
 extern crate fern;
 extern crate time;
+extern crate rand;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -49,6 +50,7 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
 }
 
 fn main() {
+    let mut rng = rand::thread_rng();
     let mut maze = Maze::from_file("maze.txt").unwrap();
 
     let logger_config = fern::DispatchConfig {
@@ -91,7 +93,7 @@ fn main() {
 
     print!("{}", maze);
     let mut player = Player {
-        pos: Posn { row: 4, col: 5 },
+        pos: maze.random_floor_tile(&mut rng),
         dir: Direction::North,
     };
 

@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
+use rand::Rng;
+use rand::distributions::{IndependentSample, Range};
 
 use ansi_term::Colour::Blue;
 use ansi_term::Style;
@@ -121,6 +123,11 @@ impl Maze {
         }
     }
 
+    //                       row    col
+    pub fn bounds(&self) -> (usize, usize) {
+        (self.map.len(), self.map[0].len())
+    }
+
     pub fn in_bounds(&self, pos: &Posn) -> bool {
         pos.row >= 0 && pos.row < self.map.len() as i32 && pos.col >= 0 &&
         pos.col < self.map[0].len() as i32
@@ -138,6 +145,26 @@ impl Maze {
                 self[&pos] = Tile::Floor;
                 self.redraw_tile(&pos);
                 self.redraw_tile(&next_tile_posn);
+            }
+        }
+    }
+
+    pub fn random_floor_tile<R: Rng>(&self, rng: &mut R) -> Posn {
+        let (max_row, max_col) = self.bounds();
+        let mut counter = 0;
+        loop {
+            let row = Range::new(0, max_row as i32).ind_sample(rng);
+            let col = Range::new(0, max_col as i32).ind_sample(rng);
+            let pos = Posn {
+                row: row,
+                col: col,
+            };
+            if self[&pos] == Tile::Floor {
+                return pos;
+            }
+            counter += 1;
+            if counter > 10_000 {
+                panic!("Can't find an empty floor tile");
             }
         }
     }
