@@ -48,4 +48,3 @@ impl Rand for Troll {
         Troll::new(rng.gen())
     }
 }
-

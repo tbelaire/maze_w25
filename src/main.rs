@@ -6,9 +6,11 @@ extern crate fern;
 extern crate time;
 extern crate rand;
 
+use std::collections::HashMap;
 use std::io::prelude::*;
 use std::fs::File;
 use std::os::unix::io::AsRawFd;
+use std::mem;
 
 use rand::Rng;
 
@@ -105,7 +107,7 @@ fn main() {
 
     info!("Starting game");
 
-    loop {
+    'main_loop: loop {
         let mut input: [u8; 64] = [0; 64];
         let bytes = match stdin.read(&mut input) {
             Ok(n) => n,
@@ -136,6 +138,31 @@ fn main() {
                     maze.push(new_player.pos, new_player.dir);
                 }
             }
+        }
+        let mut trolls = HashMap::new();
+        mem::swap(&mut trolls, &mut maze.trolls);
+        for (mut pos, mut troll) in trolls.into_iter() {
+            let dir: Direction = rng.gen();
+            if troll.alive {
+                if troll.dir == dir {
+                    maze.redraw_tile(&pos);
+                    let new_pos = pos + dir.numeric();
+                    if !maze.in_bounds(&new_pos) {
+                        panic!("Troll wandered off the map");
+                    }
+                    if new_pos == player.pos {
+                        println!("\nYou are eaten by a troll");
+                        break 'main_loop;
+                    }
+                    if maze[&new_pos] == Tile::Floor {
+                        pos = new_pos
+                    }
+                } else {
+                    troll.dir = dir;
+                }
+            }
+            maze.add_troll(pos, troll);
+            maze.redraw_tile(&pos);
         }
 
         player.draw();
