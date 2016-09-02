@@ -142,27 +142,13 @@ fn main() {
         let mut trolls = HashMap::new();
         mem::swap(&mut trolls, &mut maze.trolls);
         for (mut pos, mut troll) in trolls.into_iter() {
-            let dir: Direction = rng.gen();
-            if troll.alive {
-                if troll.dir == dir {
-                    maze.redraw_tile(&pos);
-                    let new_pos = pos + dir.numeric();
-                    if !maze.in_bounds(&new_pos) {
-                        panic!("Troll wandered off the map");
-                    }
-                    if new_pos == player.pos {
-                        println!("\nYou are eaten by a troll");
-                        break 'main_loop;
-                    }
-                    if maze[&new_pos] == Tile::Floor {
-                        pos = new_pos
-                    }
-                } else {
-                    troll.dir = dir;
-                }
-            }
+            maze.redraw_tile(&pos);
+            let (pos, ate_player) = troll.update(pos, &mut maze, player.pos, &mut rng);
             maze.add_troll(pos, troll);
             maze.redraw_tile(&pos);
+            if ate_player {
+                break 'main_loop;
+            }
         }
 
         player.draw();
