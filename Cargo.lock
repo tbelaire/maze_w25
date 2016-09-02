@@ -1,5 +1,5 @@
 [root]
-name = "weekely_challenge_25"
+name = "maze"
 version = "0.1.0"
 dependencies = [
  "ansi_term 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
