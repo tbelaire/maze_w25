@@ -111,12 +111,12 @@ fn main() {
         let mut input: [u8; 64] = [0; 64];
         let bytes = match stdin.read(&mut input) {
             Ok(n) => n,
-            Err(_) => break,
+            Err(_) => break 'main_loop,
         };
         let command = parse_keystroke(&input[..bytes]);
         let new_player = match command {
             None => continue,
-            Some(Command::Quit) => break,
+            Some(Command::Quit) => break 'main_loop,
             Some(Command::Move(dir)) => {
                 let mut new_player = player.clone();
                 new_player.update(dir);
@@ -132,7 +132,7 @@ fn main() {
                 }
                 Tile::Exit => {
                     println!("\nYou win!");
-                    break;
+                    break 'main_loop;
                 }
                 Tile::Wall => {
                     maze.push(new_player.pos, new_player.dir);
