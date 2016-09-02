@@ -2,8 +2,9 @@ use std::fmt;
 use std::borrow::Cow;
 use direction::Direction;
 
+use rand::{Rand, Rng};
+
 use ansi_term::Colour::{Red, Blue};
-use ansi_term::Style;
 use ansi_term::ANSIString;
 
 
@@ -41,3 +42,10 @@ impl Troll {
         }
     }
 }
+
+impl Rand for Troll {
+    fn rand<R: Rng>(rng: &mut R) -> Self {
+        Troll::new(rng.gen())
+    }
+}
+

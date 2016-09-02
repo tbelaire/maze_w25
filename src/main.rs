@@ -10,6 +10,8 @@ use std::io::prelude::*;
 use std::fs::File;
 use std::os::unix::io::AsRawFd;
 
+use rand::Rng;
+
 mod direction;
 mod maze;
 mod player;
@@ -21,10 +23,8 @@ mod troll;
 use direction::{Direction, North, South, East, West};
 use maze::Maze;
 use player::Player;
-use posn::Posn;
 use screen::move_cursor;
 use tile::Tile;
-use troll::Troll;
 
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -89,7 +89,10 @@ fn main() {
     termios.c_cc[VMIN] = 1;
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios).unwrap();
 
-    maze.add_troll(Posn { row: 1, col: 5 }, Troll::new(South));
+    for _ in 0..3 {
+        let tile = maze.random_floor_tile(&mut rng);
+        maze.add_troll(tile, rng.gen())
+    }
 
     print!("{}", maze);
     let mut player = Player {

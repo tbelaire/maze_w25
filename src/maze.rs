@@ -7,7 +7,6 @@ use std::io::prelude::*;
 use rand::Rng;
 use rand::distributions::{IndependentSample, Range};
 
-use ansi_term::Colour::Blue;
 use ansi_term::Style;
 use ansi_term::ANSIStrings;
 

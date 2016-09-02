@@ -1,4 +1,6 @@
 
+use rand::{Rand, Rng};
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Direction {
     North,
@@ -25,5 +27,11 @@ impl Direction {
             East => "▶",
             West => "◀",
         }
+    }
+}
+
+impl Rand for Direction {
+    fn rand<R: Rng>(rng: &mut R) -> Self {
+        *rng.choose(&[North, South, East, West]).unwrap()
     }
 }
