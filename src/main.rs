@@ -52,10 +52,6 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
 }
 
 fn main() {
-    let mut rng = rand::thread_rng();
-    // let mut maze = Maze::from_file("maze.txt").unwrap();
-    let mut maze = Maze::generate(10, 10, &mut rng);
-
     let logger_config = fern::DispatchConfig {
         format: Box::new(|msg: &str, level: &log::LogLevel, _location: &log::LogLocation| {
             // This is a fairly simple format, though it's possible to do more complicated ones.
@@ -71,6 +67,10 @@ fn main() {
     if let Err(e) = fern::init_global_logger(logger_config, log::LogLevelFilter::Trace) {
         panic!("Failed to initialize global logger: {}", e);
     }
+
+    let mut rng = rand::thread_rng();
+    // let mut maze = Maze::from_file("maze.txt").unwrap();
+    let mut maze = Maze::generate(10, 10, &mut rng);
 
     println!("q to Quit");
     println!("Maze bounds are {} by {}",

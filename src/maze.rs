@@ -147,20 +147,40 @@ impl Maze {
             None
         }
         fn lookup_center(map: &Vec<Vec<Tile>>, p: Posn) -> Tile {
-            map[(2*p.row + 1) as usize][(2 * p.col + 1) as usize]
+            map[(2 * p.row + 1) as usize][(2 * p.col + 1) as usize]
         }
         fn lookup_center_mut(map: &mut Vec<Vec<Tile>>, p: Posn) -> &mut Tile {
-            &mut map[(2*p.row + 1) as usize][(2 * p.col + 1) as usize]
+            &mut map[(2 * p.row + 1) as usize][(2 * p.col + 1) as usize]
         }
 
         let mut finished_row: usize = 0;
+        // Initialize the exit.
+        map[1][0] = Tile::Exit;
+        map[1][1] = Tile::Floor;
+        info!("Generating map");
         loop {
             let curr = hunt(&map, height, width, finished_row);
             if curr == None {
                 break;
             }
             let mut curr = curr.unwrap();
+            info!("Hunt started new section at {:?}", curr);
             finished_row = curr.row as usize;
+            let ads: Vec<Posn> = Adjacencies::new(curr)
+                .filter(|&p| {
+                    p.inside(Posn { row: 0, col: 0 },
+                             Posn {
+                                 row: height as i32,
+                                 col: width as i32,
+                             }) && lookup_center(&map, p) == Tile::Floor
+                })
+                .collect();
+            let starting_from = rng.choose(&ads).unwrap();
+            let wall = Posn {
+                row: ((2 * curr.row + 1 + 2 * starting_from.row + 1) / 2) as i32,
+                col: ((2 * curr.col + 1 + 2 * starting_from.col + 1) / 2) as i32,
+            };
+            map[wall.row as usize][wall.col as usize] = Tile::Floor;
 
             loop {
                 assert_eq!(lookup_center(&map, curr), Tile::Wall);
@@ -171,18 +191,18 @@ impl Maze {
                                  Posn {
                                      row: height as i32,
                                      col: width as i32,
-                                 }) &&
-                        lookup_center(&map, p) == Tile::Wall
+                                 }) && lookup_center(&map, p) == Tile::Wall
                     })
                     .collect();
                 if let Some(&next) = rng.choose(&ads) {
                     let wall = Posn {
-                        row: ((2 * curr.row + 1 + 2 * next.row + 1 ) / 2) as i32,
-                        col: ((2 * curr.col + 1 + 2 * next.col + 1 ) / 2) as i32,
+                        row: ((2 * curr.row + 1 + 2 * next.row + 1) / 2) as i32,
+                        col: ((2 * curr.col + 1 + 2 * next.col + 1) / 2) as i32,
                     };
                     map[wall.row as usize][wall.col as usize] = Tile::Floor;
                     curr = next;
                 } else {
+                    info!("Exhausted possibilities at {:?}", curr);
                     break;
                 }
 
