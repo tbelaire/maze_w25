@@ -141,7 +141,7 @@ fn main() {
         }
         let mut trolls = HashMap::new();
         mem::swap(&mut trolls, &mut maze.trolls);
-        for (mut pos, mut troll) in trolls.into_iter() {
+        for (pos, mut troll) in trolls.into_iter() {
             maze.redraw_tile(&pos);
             let (pos, ate_player) = troll.update(pos, &mut maze, player.pos, &mut rng);
             maze.add_troll(pos, troll);
