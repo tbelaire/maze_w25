@@ -53,7 +53,8 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
 
 fn main() {
     let mut rng = rand::thread_rng();
-    let mut maze = Maze::from_file("maze.txt").unwrap();
+    // let mut maze = Maze::from_file("maze.txt").unwrap();
+    let mut maze = Maze::generate(10, 10, &mut rng);
 
     let logger_config = fern::DispatchConfig {
         format: Box::new(|msg: &str, level: &log::LogLevel, _location: &log::LogLocation| {
