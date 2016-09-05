@@ -79,7 +79,7 @@ fn main() {
 
     use termios::*;
 
-    print!("\x1B[2J");
+    print!("\x1B[?1049h");
     print!("\x1B[1;1H");
     print!("\x1B[?25l");
 
@@ -162,7 +162,6 @@ fn main() {
     // start with it, as this fixes a broken terminal after a ctrl-c.
     termios_old.c_lflag = ICANON | ECHO | ECHOE | ECHOK | ECHONL;
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
-    print!("\x1B[2J");
-    print!("\x1B[1;1H");
+    print!("\x1B[?1049l");
     print!("\x1B[?25h");
 }
