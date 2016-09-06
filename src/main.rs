@@ -1,10 +1,10 @@
 extern crate ansi_term;
 extern crate termios;
-#[macro_use]
-extern crate log;
+#[macro_use] extern crate log;
 extern crate fern;
 extern crate time;
 extern crate rand;
+#[macro_use] extern crate text_io;
 
 use std::collections::HashMap;
 use std::io::prelude::*;
@@ -69,8 +69,13 @@ fn main() {
     }
 
     let mut rng = rand::thread_rng();
+
+    print!("Enter a size of maze:");
+    ::std::io::stdout().flush().unwrap();
+    let size: usize = read!("{}\n");
+
     // let mut maze = Maze::from_file("maze.txt").unwrap();
-    let mut maze = Maze::generate(10, 10, &mut rng);
+    let mut maze = Maze::generate(size, size, &mut rng);
 
     println!("q to Quit");
     println!("Maze bounds are {} by {}",
