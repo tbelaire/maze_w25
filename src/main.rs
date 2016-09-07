@@ -154,7 +154,6 @@ fn main() {
                     player = new_player;
                 }
                 Tile::Exit => {
-                    println!("\nYou win!");
                     quit_reason = QuitReason::Escaped;
                     break 'main_loop;
                 }
@@ -166,6 +165,14 @@ fn main() {
         let mut trolls = HashMap::new();
         mem::swap(&mut trolls, &mut maze.trolls);
         for (pos, mut troll) in trolls.into_iter() {
+            if pos == player.pos {
+                quit_reason = QuitReason::Eaten;
+                break 'main_loop;
+            }
+            if maze[&pos] == Tile::Wall {
+                troll.alive = false;
+                continue;
+            }
             maze.redraw_tile(&pos);
             let (pos, ate_player) = troll.update(pos, &mut maze, player.pos, &mut rng);
             maze.add_troll(pos, troll);

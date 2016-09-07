@@ -71,7 +71,6 @@ impl Troll {
                         panic!("Troll wandered off the map");
                     }
                     if new_pos == player_pos {
-                        println!("\nYou were eaten by a troll");
                         return (new_pos, true);
                     }
                     if maze[&new_pos] == Tile::Floor {
@@ -103,7 +102,6 @@ impl Troll {
                     panic!("Troll charged off the map");
                 }
                 if new_pos == player_pos {
-                    println!("\nYou were eaten by a troll");
                     return (new_pos, true);
                 }
                 match maze[&new_pos] {
