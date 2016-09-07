@@ -171,7 +171,6 @@ fn main() {
             }
             if maze[&pos] == Tile::Wall {
                 troll.alive = false;
-                continue;
             }
             maze.redraw_tile(&pos);
             let (pos, ate_player) = troll.update(pos, &mut maze, player.pos, &mut rng);
