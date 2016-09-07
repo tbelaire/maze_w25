@@ -81,6 +81,9 @@ fn main() {
     print!("Enter a size of maze:");
     ::std::io::stdout().flush().unwrap();
     let size: usize = read!("{}\n");
+    print!("Enter the number of trolls:");
+    ::std::io::stdout().flush().unwrap();
+    let num_trolls: usize = read!("{}\n");
 
     // let mut maze = Maze::from_file("maze.txt").unwrap();
     let mut maze = Maze::generate(size, size, &mut rng);
@@ -105,7 +108,7 @@ fn main() {
     termios.c_cc[VMIN] = 1;
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios).unwrap();
 
-    for _ in 0..3 {
+    for _ in 0..num_trolls {
         let tile = maze.random_floor_tile(&mut rng);
         maze.add_troll(tile, rng.gen())
     }
