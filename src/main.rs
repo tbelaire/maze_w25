@@ -35,6 +35,14 @@ enum Command {
     Quit,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+enum QuitReason {
+    Eaten,
+    Escaped,
+    Quit,
+    Error,
+}
+
 fn parse_keystroke(input: &[u8]) -> Option<Command> {
     use Command::*;
     match input {
@@ -111,18 +119,27 @@ fn main() {
     player.draw();
     ::std::io::stdout().flush().unwrap();
 
+    let mut quit_reason: QuitReason;
     info!("Starting game");
+    let mut ticks = 0;
 
     'main_loop: loop {
+        ticks += 1;
         let mut input: [u8; 64] = [0; 64];
         let bytes = match stdin.read(&mut input) {
             Ok(n) => n,
-            Err(_) => break 'main_loop,
+            Err(_) => {
+                quit_reason = QuitReason::Error;
+                break 'main_loop
+            },
         };
         let command = parse_keystroke(&input[..bytes]);
         let new_player = match command {
             None => continue,
-            Some(Command::Quit) => break 'main_loop,
+            Some(Command::Quit) => {
+                quit_reason = QuitReason::Quit;
+                break 'main_loop;
+            }
             Some(Command::Move(dir)) => {
                 let mut new_player = player.clone();
                 new_player.update(dir);
@@ -138,6 +155,7 @@ fn main() {
                 }
                 Tile::Exit => {
                     println!("\nYou win!");
+                    quit_reason = QuitReason::Escaped;
                     break 'main_loop;
                 }
                 Tile::Wall => {
@@ -153,6 +171,7 @@ fn main() {
             maze.add_troll(pos, troll);
             maze.redraw_tile(&pos);
             if ate_player {
+                quit_reason = QuitReason::Eaten;
                 break 'main_loop;
             }
         }
@@ -163,10 +182,16 @@ fn main() {
         ::std::io::stdout().flush().unwrap();
     }
     info!("Game over");
-    // We always want to set the terminal to echo stuff, even if we didn't
+
     // start with it, as this fixes a broken terminal after a ctrl-c.
     termios_old.c_lflag = ICANON | ECHO | ECHOE | ECHOK | ECHONL;
     tcsetattr(stdin.as_raw_fd(), TCSAFLUSH, &termios_old).unwrap();
     print!("\x1B[?1049l");
     print!("\x1B[?25h");
+    match quit_reason {
+        QuitReason::Quit => println!("You quit after {} ticks", ticks),
+        QuitReason::Eaten => println!("You were eaten after {} ticks", ticks),
+        QuitReason::Escaped => println!("You escaped after {} ticks", ticks),
+        QuitReason::Error => println!("Error!"),
+    }
 }
