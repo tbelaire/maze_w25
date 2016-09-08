@@ -17,6 +17,10 @@ use troll::Troll;
 use direction::Direction;
 
 
+const WALL_TILE: Tile = Tile::Wall;
+const WALL_TILE_REF: &'static Tile = &WALL_TILE;
+
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Maze {
     pub map: Vec<Vec<Tile>>,
@@ -33,7 +37,11 @@ impl ::std::ops::Index<(usize, usize)> for Maze {
 impl<'c> ::std::ops::Index<&'c Posn> for Maze {
     type Output = Tile;
     fn index<'a, 'b>(&'a self, p: &'b Posn) -> &'a Tile {
-        &self.map[p.row as usize][p.col as usize]
+        if self.in_bounds(p) {
+            &self.map[p.row as usize][p.col as usize]
+        } else {
+            WALL_TILE_REF
+        }
     }
 }
 
