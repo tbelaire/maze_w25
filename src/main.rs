@@ -1,10 +1,12 @@
 extern crate ansi_term;
 extern crate termios;
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 extern crate fern;
 extern crate time;
 extern crate rand;
-#[macro_use] extern crate text_io;
+#[macro_use]
+extern crate text_io;
 
 use std::collections::HashMap;
 use std::io::prelude::*;
@@ -133,8 +135,8 @@ fn main() {
             Ok(n) => n,
             Err(_) => {
                 quit_reason = QuitReason::Error;
-                break 'main_loop
-            },
+                break 'main_loop;
+            }
         };
         let command = parse_keystroke(&input[..bytes]);
         let new_player = match command {
