@@ -23,6 +23,8 @@ mod posn;
 mod screen;
 mod tile;
 mod troll;
+mod pathfind;
+mod grid;
 
 use direction::{Direction, North, South, East, West};
 use maze::Maze;
@@ -34,6 +36,7 @@ use tile::Tile;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum Command {
     Move(Direction),
+    Pathfind,
     Quit,
 }
 
@@ -57,6 +60,7 @@ fn parse_keystroke(input: &[u8]) -> Option<Command> {
         b"a" => Some(Move(West)),
         b"d" => Some(Move(East)),
         b"q" => Some(Quit),
+        b"p" => Some(Pathfind),
         _ => None,
     }
 }
@@ -149,6 +153,13 @@ fn main() {
                 let mut new_player = player.clone();
                 new_player.update(dir);
                 new_player
+            }
+            Some(Command::Pathfind) => {
+                let path = pathfind::pathfind(&maze, player.pos);
+                move_cursor(30, 0);
+                println!("path: {:?}", path);
+                info!("path from {:?}: {:?}", player.pos, path);
+                continue;
             }
         };
         if maze.in_bounds(&new_player.pos) {
