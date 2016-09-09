@@ -19,6 +19,18 @@ impl Posn {
             col: sum.col / 2,
         }
     }
+
+    pub fn direction_to(self, other: Posn) -> Direction {
+        let dx = self.col - other.col;
+        let dy = self.row - other.row;
+
+        use direction::Direction::*;
+        if dx.abs() > dy.abs() {
+            if dx >= 0 { West } else { East }
+        } else {
+            if dy >= 0 { North } else { South }
+        }
+    }
 }
 
 impl ::std::ops::Add<Posn> for Posn {
@@ -120,4 +132,14 @@ fn test_iter_adjacencies() {
                Posn{ row: 0, col: 0},
                ]);
 
+}
+
+#[test]
+fn test_dir_to() {
+    use direction::Direction::*;
+    let p = Posn { row: 1, col: 1 };
+    for dir in &[North, South, East, West] {
+        assert_eq!(p.direction_to(p + dir.numeric()), *dir);
+    }
+    assert_eq!(p.direction_to(p), North);
 }
