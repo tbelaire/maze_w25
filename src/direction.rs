@@ -28,6 +28,15 @@ impl Direction {
             West => "◀",
         }
     }
+
+    pub fn flip(&self) -> Direction {
+        match *self {
+            North => South,
+            South => North,
+            East => West,
+            West => East,
+        }
+    }
 }
 
 impl Rand for Direction {
