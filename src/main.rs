@@ -87,6 +87,10 @@ fn main() {
     print!("Enter a size of maze:");
     ::std::io::stdout().flush().unwrap();
     let size: usize = read!("{}\n");
+    if size < 1 {
+        println!("Too small");
+        return;
+    }
     print!("Enter the number of trolls:");
     ::std::io::stdout().flush().unwrap();
     let num_trolls: usize = read!("{}\n");
@@ -128,7 +132,7 @@ fn main() {
     player.draw();
     ::std::io::stdout().flush().unwrap();
 
-    let mut quit_reason: QuitReason;
+    let quit_reason: QuitReason;
     info!("Starting game");
     let mut ticks = 0;
 
